@@ -1,4 +1,5 @@
 #include <Eigen/Core>
+#include <stdexcept>
 #include <iostream>
 #include <cmath>
 #include <random>
@@ -24,7 +25,7 @@ namespace walkers {
     const vector_t& walker::get_lengths(void) const {return l_;};
 
     //Utility Functions
-    vector3_t walker::get_com(void) {return x_.colwise().mean();};
+    vector3_t walker::get_com(void) const {return x_.colwise().mean();};
 
     vector3_t walker::rand_sphere(void) {
         //Random number generation
@@ -41,36 +42,48 @@ namespace walkers {
         return vec*l0_;
     };
 
-    f_type walker::dist(const int& a, const int& b) {
+    f_type walker::dist(const int& a, const int& b){
        vector3_t vec = vector3_t::Zero(); 
        vec = x_.row(a) - x_.row(b);
        return vec.norm();
     };
 
-    f_type walker::get_rg(void) {
+    f_type walker::get_rg(void) const{
         f_type rg = 0.0;
         vector3_t com = get_com();
         rg = (x_.rowwise()-com.transpose()).rowwise().squaredNorm().sum()/float(x_.rows());
         return rg;
     };
 
-    f_type walker::get_gene_length(void) {return l_.sum();};
+    f_type walker::get_gene_length(void) const{return l_.sum();};
 
-    int walker::nearest_neighbor(const vector3_t& v) {
-        f_type tol = 5.0;
+    int walker::nearest_neighbor(const vector3_t& v, f_type tol) {
         Eigen::ArrayXXf tmp(x_.rows(),3);
         tmp = (x_.rowwise()-v.transpose()).rowwise().norm();
         return (tmp < tol).count();
     };
 
     //Chain Growth
-    bool walker::chain_growth(void) {
-        int jdx = 1;
-        const int max_trial=100; 
+    void walker::chain_growth(const f_type tol, const uint max_trial) {
+
+        if (tol < 0.0) 
+            throw std::invalid_argument("Tolerance for nearest neighbor must be greater than zero");
+        if (max_trial < 0)
+            throw std::invalid_argument("Maximum number of trials must be greater than zero");
+
+        bool chain_bool = false;
+        while (!chain_bool)
+            chain_bool = chain_test(tol,max_trial);
+
+        return;
+    };
+
+    bool walker::chain_test(const f_type tol, const uint max_trial) {
+        uint jdx = 1;
         for (size_t i=2; i<npoints_; i++) {
             for (size_t j=0; j<max_trial; j++) {
                 vector3_t x = x_.row(i-1).transpose()+rand_sphere();
-                int count = nearest_neighbor(x);
+                int count = nearest_neighbor(x,tol);
                 if (count == 0) {
                     x_.row(i) = x.transpose();
                     break;
@@ -84,20 +97,4 @@ namespace walkers {
         return true;
     };
 }
-
-//using namespace walkers;
-//int main(int argc, char* argv) {
-//    walker sarw = walker(100000,10);
-//    bool testBool = false;
-//    while(!testBool) {
-//        testBool = sarw.chain_growth();
-//    }
-//    std::cout<<sarw.get_coord()<<std::endl;
-//    std::cout<<sarw.get_rg()<<std::endl;
-//    //std::cout<<sarw.rand_sphere()<<std::endl;
-//    //std::cout<<sarw.get_lengths()<<std::endl;
-//    //std::cout<<sarw.get_glength()<<std::endl;
-//    //std::cout<<sarw.get_com().transpose()<<std::endl;
-//    return 0;
-//}
 

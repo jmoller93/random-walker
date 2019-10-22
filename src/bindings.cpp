@@ -17,9 +17,12 @@ PYBIND11_MODULE(walkers, m)
         .def("get_rg", &walker::get_rg)
         .def("get_com", &walker::get_com)
         .def("get_gene_length", &walker::get_gene_length)
-        .def("set_monomers", &walker::set_monomers)
-        .def("set_bond_length", &walker::set_bond_length)
-        .def("chain_growth", &walker::chain_growth)
+        .def("set_monomers", &walker::set_monomers,
+                py::arg("n") = 0)
+        .def("set_bond_length", &walker::set_bond_length,
+                py::arg("l") = 0)
+        .def("chain_growth", &walker::chain_growth,
+                py::arg("tol") = 0.0, py::arg("max_trials") = 0)
         .def("dist", &walker::dist);
 		//.def("save", &distance_matrix::save)
 	

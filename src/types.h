@@ -4,6 +4,7 @@
 
 #define f_type float
 
+//Types courtesy of Hythem Sidky
 namespace walkers
 {
 	using matrix_t = Eigen::Matrix<f_type, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;

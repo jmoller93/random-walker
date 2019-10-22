@@ -15,10 +15,10 @@ namespace walkers {
 
             //Utility Functions
             vector3_t rand_sphere(void);  // Returns a random point on the surface of a sphere
-            int nearest_neighbor(const vector3_t&); // Calculates the distance to the nearest neighbor
+            int nearest_neighbor(const vector3_t&, f_type); // Calculates the distance to the nearest neighbor
+            bool chain_test(const f_type, const uint); // Grow the chain if possible
         public:
             //Initializers
-            //walker();
             walker(const uint&, const uint&);
             //walker(const std::string&); // Initialize by file to be implemented
 
@@ -32,12 +32,12 @@ namespace walkers {
             const vector_t& get_lengths(void) const;
 
             //Growth of chain
-            bool chain_growth(void);      // Grow chain
+            void chain_growth(const f_type,const uint); // Grow successful chain
 
             //Utility Functions
-            vector3_t get_com(void);      // Gets center of mass
-            f_type get_rg(void);          // Get the radius of gyration
-            f_type get_gene_length(void);     // Gets the genomic length 
+            vector3_t get_com(void) const;       // Gets center of mass
+            f_type get_rg(void) const;           // Get the radius of gyration
+            f_type get_gene_length(void) const;  // Gets the genomic length 
             f_type dist(const int&, const int&); // Calculate the euclidean distance of two points
     };
 }
