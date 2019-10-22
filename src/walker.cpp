@@ -1,6 +1,6 @@
-#include <Eigen/Core>
 #include <stdexcept>
 #include <iostream>
+#include <fstream>
 #include <cmath>
 #include <random>
 #include "walker.h"
@@ -15,6 +15,26 @@ namespace walkers {
         x_.row(1) = rand_sphere().transpose();
         l_ = vector_t::Ones(npoints_-1)*187;
     };
+
+    // Based on https://stackoverflow.com/questions/25389480    
+    walker::walker(const std::string& filename)
+    {
+        #ifdef _OPENMP
+        if(num_threads) omp_set_num_threads(num_threads);
+        #endif
+
+        std::ifstream in(filename, std::ios::in | std::ios::binary);
+        
+        // Read in distance matrix. 
+        {
+            matrix_t::Index rows = 0, cols = 0;
+            in.read((char*) (&rows), sizeof(matrix_t::Index));
+            in.read((char*) (&cols), sizeof(matrix_t::Index));
+            x_.resize(rows, cols);
+            in.read((char*) x_.data(), x_.size()*sizeof(matrix_t::Scalar));
+        }  
+        in.close();
+    }
 
     //Setters
     void walker::set_monomers(const uint& npoints) {npoints_ = npoints;};
@@ -95,6 +115,21 @@ namespace walkers {
             }
         }
         return true;
+    };
+
+    // Based on https://stackoverflow.com/questions/25389480
+    void walker::save(const std::string& filename) const
+    {
+        std::ofstream out(filename, std::ios::out | std::ios::binary | std::ios::trunc);
+        
+        // Write out distance matrix. 
+        {
+            matrix_t::Index rows = x_.rows(), cols = x_.cols();
+            out.write((char*) (&rows), sizeof(matrix_t::Index));
+            out.write((char*) (&cols), sizeof(matrix_t::Index));
+            out.write((char*) x_.data(), x_.size()*sizeof(matrix_t::Scalar));
+        } 
+        out.close();
     };
 }
 

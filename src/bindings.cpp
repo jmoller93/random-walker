@@ -11,7 +11,7 @@ PYBIND11_MODULE(walkers, m)
 	// Walker class
 	py::class_<walker>(m, "Walker")
         .def(py::init<const uint&, const uint&>())
-		//.def(py::init<>(),py::arg())
+		.def(py::init<const std::string&>())
 		.def("get_coord", &walker::get_coord)
 		.def("get_length", &walker::get_lengths)
         .def("get_rg", &walker::get_rg)

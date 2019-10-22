@@ -20,7 +20,7 @@ namespace walkers {
         public:
             //Initializers
             walker(const uint&, const uint&);
-            //walker(const std::string&); // Initialize by file to be implemented
+            walker(const std::string&); // Initialize by file to be implemented
 
             //Setters
             void set_monomers(const uint&);
@@ -39,5 +39,6 @@ namespace walkers {
             f_type get_rg(void) const;           // Get the radius of gyration
             f_type get_gene_length(void) const;  // Gets the genomic length 
             f_type dist(const int&, const int&); // Calculate the euclidean distance of two points
+            void save(const std::string&) const; // Save coordinates to file
     };
 }
