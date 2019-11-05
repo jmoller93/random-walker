@@ -16,6 +16,8 @@ namespace walkers {
         l_ = vector_t::Ones(npoints_-1)*187;
     };
 
+    //Initialize by dists
+    walker::walker(void) {};
     // Based on https://stackoverflow.com/questions/25389480    
     walker::walker(const std::string& filename)
     {
@@ -80,6 +82,7 @@ namespace walkers {
     };
 
     //Chain Growth
+    //Grow according to a Rosenbluth-weighted random walk
     void walker::chain_growth(const f_type tol, const uint max_trial) {
         if (tol < 0.0) 
             throw std::invalid_argument("Tolerance for nearest neighbor must be greater than zero");
@@ -99,6 +102,20 @@ namespace walkers {
             }
         }
         return;
+    };
+
+    //Grow according to a distance array
+    void walker::chain_growth(const vector_t dists) {
+
+        vector3_t tmp = vector3_t::Zero();
+        x_.resize(dists.rows()+1,3);
+        x_.row(0) = vector3_t(0,0,0).transpose();
+        l_.resize(dists.rows());
+
+        for (size_t i=0; i<dists.rows(); i++) {
+            tmp += vector3_t(dists(i),0,0);
+            x_.row(i+1) = tmp;
+        }
     };
 
     bool walker::chain_test(uint idx, const f_type tol, const uint max_trial, matrix3_t& x_test) {

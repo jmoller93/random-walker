@@ -23,6 +23,7 @@ namespace walkers {
 
         public:
             //Initializers
+            walker(void);
             walker(const uint&, const uint&);
             walker(const std::string&); // Initialize by file to be implemented
 
@@ -36,7 +37,8 @@ namespace walkers {
             const vector_t& get_lengths(void) const;
 
             //Growth of chain
-            virtual void chain_growth(const f_type,const uint); // Grow successful chain
+            void chain_growth(const f_type,const uint); // Grow successful chain
+            void chain_growth(const vector_t); // Grow successful chain
 
             //Utility Functions
             f_type get_rg(void) const;           // Get the radius of gyration
