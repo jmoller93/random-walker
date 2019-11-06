@@ -17,7 +17,11 @@ PYBIND11_MODULE(walkers, m)
 		.def("get_length", &walker::get_lengths)
         .def("get_rg", &walker::get_rg)
         //.def("get_com", &walker::get_com)
-        .def("get_gene_length", &walker::get_gene_length)
+        .def("get_gene_length", py::overload_cast<> (&walker::get_gene_length))
+        .def("get_gene_length", py::overload_cast<const vector_t> (&walker::get_gene_length),
+                py::arg("lengths"))
+        .def("get_looping_histogram", &walker::get_looping_histogram,
+                py::arg("tol") = 0.0)
         .def("set_monomers", &walker::set_monomers,
                 py::arg("n") = 0)
         .def("set_bond_length", &walker::set_bond_length,

@@ -43,8 +43,11 @@ namespace walkers {
 
             //Utility Functions
             f_type get_rg(void) const;           // Get the radius of gyration
-            f_type get_gene_length(void) const;  // Gets the genomic length 
+            f_type get_gene_length(void);  // Gets the genomic length 
+            f_type get_gene_length(const vector_t); 
             f_type dist(const int&, const int&); // Calculate the euclidean distance of two points
+
+            matrix_t get_looping_histogram(const f_type); // Get the histogram of returning to itself
             void save(const std::string&) const; // Save coordinates to file
     };
 }
