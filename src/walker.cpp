@@ -6,16 +6,15 @@
 #include "utils.h"
 
 namespace walkers {
-    //Initializers
-    //walker::walker() {};
-
+    // Initializers
     walker::walker(const uint& npoints, const uint& l0) : npoints_(npoints), l0_(l0)  {
         x_.resize(npoints_,3);
         x_.row(0) = vector3_t::Zero().transpose();
         x_.row(1) = rand_sphere().transpose();
         l_ = vector_t::Ones(npoints_-1)*187;
     };
-
+    // Initialize by dists
+    walker::walker(void) {};
     // Based on https://stackoverflow.com/questions/25389480    
     walker::walker(const std::string& filename)
     {
@@ -36,17 +35,18 @@ namespace walkers {
         in.close();
     }
 
-    //Setters
+    // Setters
     void walker::set_monomers(const uint& npoints) {npoints_ = npoints;};
     void walker::set_bond_length(const uint& l0) {l0_ = l0;};
 
-    //Getters
+    // Getters
     const matrix3_t& walker::get_coord(void) const {return x_;};
     const vector_t& walker::get_lengths(void) const {return l_;};
 
-    //Utility Functions
+    // Utility Functions
     vector3_t walker::get_com(void) const {return x_.colwise().mean();};
 
+    // Generate a random vector on a sphere
     vector3_t walker::rand_sphere(void) {
         //Random number generation
         vector3_t vec = vector3_t::Zero();
@@ -58,12 +58,14 @@ namespace walkers {
         return vec*l0_;
     };
 
+    // Get the distance between two sites
     f_type walker::dist(const int& a, const int& b){
        vector3_t vec = vector3_t::Zero(); 
        vec = x_.row(a) - x_.row(b);
        return vec.norm();
     };
 
+    // Get the radius of gyration of the fiber
     f_type walker::get_rg(void) const{
         f_type rg = 0.0;
         vector3_t com = get_com();
@@ -71,15 +73,20 @@ namespace walkers {
         return rg;
     };
 
-    f_type walker::get_gene_length(void) const{return l_.sum();};
+    // Get the length of the fiber in bp
+    f_type walker::get_gene_length(void){return l_.sum();};
+    f_type walker::get_gene_length(const vector_t l){return l.sum();};
 
+    // Evaluate overlaps
     bool walker::nearest_neighbor(const vector3_t& v, uint idx, f_type tol) {
         Eigen::ArrayXXf tmp(idx,3);
         tmp = (x_.block(0,0,idx,3).rowwise()-v.transpose()).rowwise().norm();
         return (tmp < tol).any();
     };
 
-    //Chain Growth
+    // Chain Growth
+    // Grow according to a Rosenbluth-weighted random walk
+    // Future Tip: These should just be split into derived classes in the future
     void walker::chain_growth(const f_type tol, const uint max_trial) {
         if (tol < 0.0) 
             throw std::invalid_argument("Tolerance for nearest neighbor must be greater than zero");
@@ -101,6 +108,46 @@ namespace walkers {
         return;
     };
 
+    // Grow according to a pre-determined distance array
+    void walker::chain_growth(const vector_t dists) {
+
+        vector3_t tmp = vector3_t::Zero();
+        x_.resize(dists.rows()+1,3);
+        x_.row(0) = vector3_t(0,0,0).transpose();
+        l_.resize(dists.rows());
+
+        for (size_t i=0; i<dists.rows(); i++) {
+            tmp += vector3_t(dists(i),0,0);
+            x_.row(i+1) = tmp;
+        }
+    };
+
+    // Monte-Carlo pivot the chain
+    bool walker::pivot(const f_type tol) {
+
+        uint idx = 0;
+        matrix3_t x_prev = x_;
+
+        idx = random_uniform_int(x_.rows()-1);
+
+        // No move necessary for first or last index
+        if (idx == 0 || idx == x_.rows()-1) 
+            return true;
+       
+        // Rotate by random unit quaternion 
+        quaternion4_t q = quaternion4_t::UnitRandom();
+        for (size_t i=idx+1; i<x_.rows(); i++) {
+            vector3_t diff_vect = (x_.row(i)-x_.row(idx));
+            x_.row(i) = (q*diff_vect).transpose() + x_.row(idx); 
+            if (nearest_neighbor(x_.row(i).transpose(),idx,tol)) {
+                x_ = x_prev;
+                return false;
+            }    
+        }
+        return true;
+    };
+
+    // Rosenbluth sampling chain growth attempt
     bool walker::chain_test(uint idx, const f_type tol, const uint max_trial, matrix3_t& x_test) {
         uint count = 0;
         for (size_t j=0; j<max_trial; j++) {
@@ -135,6 +182,18 @@ namespace walkers {
             out.write((char*) x_.data(), x_.size()*sizeof(matrix_t::Scalar));
         } 
         out.close();
+    };
+
+    matrix_t walker::get_looping_histogram(const f_type tol) {
+        matrix_t hist = matrix_t::Zero(x_.rows()-1,2);
+        for (size_t i=0;i<x_.rows()-1;i++) {
+            for (size_t j=i+1;j<x_.rows();j++) {
+                if (dist(j,i) < tol)
+                    hist.coeffRef(j-i,1)+=1;
+                hist.coeffRef(j-i,0)+=1;
+            }
+        }
+        return hist;
     };
 }
 

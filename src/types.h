@@ -1,6 +1,7 @@
 #pragma once 
 
 #include <Eigen/Core>
+#include <Eigen/Geometry>
 
 #define f_type float
 
@@ -13,4 +14,5 @@ namespace walkers
 	using vector3_t = Eigen::Matrix<f_type, 3, 1>;
 	using matrix3_t = Eigen::Matrix<f_type, Eigen::Dynamic, 3, Eigen::RowMajor>;
 	using matrix33_t = Eigen::Matrix<f_type, 3, 3, Eigen::RowMajor>;
+    using quaternion4_t  = Eigen::Quaternionf;
 }

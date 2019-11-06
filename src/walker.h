@@ -23,6 +23,7 @@ namespace walkers {
 
         public:
             //Initializers
+            walker(void);
             walker(const uint&, const uint&);
             walker(const std::string&); // Initialize by file to be implemented
 
@@ -36,12 +37,17 @@ namespace walkers {
             const vector_t& get_lengths(void) const;
 
             //Growth of chain
-            virtual void chain_growth(const f_type,const uint); // Grow successful chain
+            void chain_growth(const f_type,const uint); // Grow successful chain
+            void chain_growth(const vector_t); // Grow successful chain
+            bool pivot(const f_type); // Pivot the chain in a Monte-Carlo fashion
 
             //Utility Functions
             f_type get_rg(void) const;           // Get the radius of gyration
-            f_type get_gene_length(void) const;  // Gets the genomic length 
+            f_type get_gene_length(void);  // Gets the genomic length 
+            f_type get_gene_length(const vector_t); 
             f_type dist(const int&, const int&); // Calculate the euclidean distance of two points
+
+            matrix_t get_looping_histogram(const f_type); // Get the histogram of returning to itself
             void save(const std::string&) const; // Save coordinates to file
     };
 }
