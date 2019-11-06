@@ -24,7 +24,10 @@ PYBIND11_MODULE(walkers, m)
                 py::arg("l") = 0)
         .def("chain_growth", py::overload_cast<const f_type, const uint> (&walker::chain_growth),
                 py::arg("tol") = 0.0, py::arg("max_trials") = 0)
-        .def("chain_growth", py::overload_cast<const vector_t> (&walker::chain_growth))
+		.def("pivot", &walker::pivot,
+                py::arg("tol") = 0.0)
+        .def("chain_growth", py::overload_cast<const vector_t> (&walker::chain_growth),
+                py::arg("dists"))
         .def("dist", &walker::dist)
 		.def("save", &walker::save);
 	

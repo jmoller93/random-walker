@@ -75,9 +75,9 @@ namespace walkers {
 
     f_type walker::get_gene_length(void) const{return l_.sum();};
 
-    bool walker::nearest_neighbor(const vector3_t& v, uint idx, f_type tol) {
+    bool walker::nearest_neighbor(const vector3_t& v, uint idx, uint jdx, f_type tol) {
         Eigen::ArrayXXf tmp(idx,3);
-        tmp = (x_.block(0,0,idx,3).rowwise()-v.transpose()).rowwise().norm();
+        tmp = (x_.block(idx,0,jdx,3).rowwise()-v.transpose()).rowwise().norm();
         return (tmp < tol).any();
     };
 
@@ -118,11 +118,29 @@ namespace walkers {
         }
     };
 
+    //Monte-Carlo pivot the chain
+    bool walker::pivot(const f_type tol) {
+
+        uint idx = 0;
+        matrix3_t x_prev = x_;
+
+        idx = random_uniform_int(x_.rows()-2);
+        quaternion4_t q = quaternion4_t::UnitRandom();
+        for (size_t i=idx+1; i<x_.rows(); i++) {
+            vector3_t diff_vect = (x_.row(i)-x_.row(idx));
+            x_.row(i) = (q*diff_vect).transpose() + x_.row(idx); 
+            if (nearest_neighbor(x_.row(i).transpose(),0,idx,tol))
+                return false;
+        }
+
+        return true;
+    };
+
     bool walker::chain_test(uint idx, const f_type tol, const uint max_trial, matrix3_t& x_test) {
         uint count = 0;
         for (size_t j=0; j<max_trial; j++) {
             vector3_t x = x_.row(idx-1).transpose()+rand_sphere();
-            if (!nearest_neighbor(x,idx,tol)) {
+            if (!nearest_neighbor(x,0,idx,tol)) {
 				if (count == 0) {
 					x_test.resize(1,3);
 					x_test.row(0) = x;
