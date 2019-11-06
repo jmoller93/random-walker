@@ -18,7 +18,7 @@ namespace walkers {
             vector3_t rand_sphere(void);   // Returns a random point on the surface of a sphere
             vector3_t get_com(void) const; // Gets center of mass
             //int  sample_uniform_int(uint); // Sample random integer
-            bool nearest_neighbor(const vector3_t&, uint, uint, f_type); // Calculates the distance to the nearest neighbor
+            bool nearest_neighbor(const vector3_t&, uint, f_type); // Calculates the distance to the nearest neighbor
             bool chain_test(uint, const f_type, const uint, matrix3_t&); // Grow the chain if possible
 
         public:
