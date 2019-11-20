@@ -184,6 +184,7 @@ namespace walkers {
         out.close();
     };
 
+    // Get the looping probability of the current chain configuration
     matrix_t walker::get_looping_histogram(const f_type tol) {
         matrix_t hist = matrix_t::Zero(x_.rows()-1,2);
         for (size_t i=0;i<x_.rows()-1;i++) {
@@ -194,6 +195,29 @@ namespace walkers {
             }
         }
         return hist;
+    };
+
+    // Generalized form of a distance matrix
+    matrix_t walker::get_dist_mat(const f_type frac) {
+        // Get the reduced distance matrix
+        uint nreduce = int(x_.rows()*frac);
+        uint dimred  = int(x_.rows()*(1.0/nreduce));
+        matrix_t dmat = matrix_t::Zero(nreduce,nreduce);
+        matrix_t rvec = matrix_t::Zero(nreduce,3);
+
+        // Calculate the reduced dimensionality vector
+        for (size_t i=0; i<rvec.rows()-1; i++)
+            rvec.row(i) = x_.block(i*dimred,0,dimred,3).colwise().mean();
+
+        // Calculate the reduced dimensionality 
+        for (size_t i=0;i<rvec.rows()-1;i++) {
+            for (size_t j=i+1;j<rvec.rows();j++) {
+                f_type dist = (rvec.row(j)-rvec.row(i)).norm();
+                dmat.coeffRef(i,j)=dist;
+                dmat.coeffRef(j,i)=dist;
+            }
+        }
+        return dmat;
     };
 }
 

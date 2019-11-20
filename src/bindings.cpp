@@ -22,6 +22,8 @@ PYBIND11_MODULE(walkers, m)
                 py::arg("lengths"))
         .def("get_looping_histogram", &walker::get_looping_histogram,
                 py::arg("tol") = 0.0)
+        .def("get_dist_mat", &walker::get_dist_mat,
+                py::arg("frac") = 0.0)
         .def("set_monomers", &walker::set_monomers,
                 py::arg("n") = 0)
         .def("set_bond_length", &walker::set_bond_length,

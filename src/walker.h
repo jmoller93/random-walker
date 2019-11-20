@@ -7,8 +7,8 @@ namespace walkers {
     //Walker class initialization
     class walker {
         private:
-            matrix3_t x_;  // Positions
-            vector_t l_;   // Linker lengths
+            matrix3_t x_;   // Positions
+            vector_t l_;    // Linker lengths
 
         protected:
             uint npoints_; // Number of points in the walker
@@ -48,6 +48,8 @@ namespace walkers {
             f_type dist(const int&, const int&); // Calculate the euclidean distance of two points
 
             matrix_t get_looping_histogram(const f_type); // Get the histogram of returning to itself
+            matrix_t get_dist_mat(const f_type); // Get the distance matrix
+
             void save(const std::string&) const; // Save coordinates to file
     };
 }
